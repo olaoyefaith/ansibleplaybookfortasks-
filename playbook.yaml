@@ -1,0 +1,55 @@
+---
+- name: DevOps Tasks
+  hosts: servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check server uptime
+      command: uptime
+      register: uptime_result
+
+    - name: Display server uptime
+      debug:
+        msg: "Server uptime: {{ uptime_result.stdout }}"
+
+    - name: Configure additional cron jobs
+      cron:
+        name: "Additional Cron Job"
+        minute: "0"
+        hour: "*/2"
+        job: "/path/to/your/cron/script.sh"
+        state: present
+
+    - name: Gather server stats and sar
+      shell: sar -u 1 5 > /tmp/server_stats.txt
+      register: sar_result
+      changed_when: false
+
+    - name: Display server stats
+      debug:
+        msg: "Server stats: {{ sar_result.stdout }}"
+
+    - name: Collect server logs
+      fetch:
+        src: "/var/log/syslog"
+        dest: "/tmp/"
+        flat: yes
+
+    - name: Install packages and software
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - package1
+        - package2
+        - package3
+
+    - name: Remove packages and software
+      apt:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - package4
+        - package5
+        - package6
